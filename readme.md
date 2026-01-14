@@ -22,6 +22,12 @@ to use, run:
 
 will work with any folder containing .md files (loose or in folders)
 
+## Simple UI
+
+Run the Tkinter UI to select a vault folder, choose which top-level folders to include, and generate the combined RTF:
+
+`python3 combine_md_ui.py`
+
 
 ### Ignoring Folders
 
