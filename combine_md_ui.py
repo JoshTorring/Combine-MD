@@ -4,7 +4,7 @@ import sys
 import shutil
 import subprocess
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 
 OUTDIR_NAME = "combined_output_folder"
 TMPDIR_NAME = "_tmp_md_flat"
@@ -22,6 +22,7 @@ class CombineMDApp:
         self.select_button: tk.Button | None = None
         self.background_canvas: tk.Canvas | None = None
         self.content_window: int | None = None
+        self.style = ttk.Style()
 
         self._build_ui()
 
@@ -31,89 +32,118 @@ class CombineMDApp:
         hover_color = "#7ecbff"
         plus_color = "#ff3333"
 
+        self.style.theme_use("clam")
+        self.style.configure("App.TFrame", background=bg_color)
+        self.style.configure("App.TLabel", background=bg_color, foreground=text_color)
+        self.style.configure(
+            "App.TButton",
+            background=bg_color,
+            foreground=text_color,
+            borderwidth=0,
+            focusthickness=0,
+            padding=(14, 6),
+        )
+        self.style.map(
+            "App.TButton",
+            background=[("active", hover_color)],
+            foreground=[("active", text_color)],
+        )
+        self.style.configure(
+            "Run.TButton",
+            background=bg_color,
+            foreground=text_color,
+            borderwidth=0,
+            focusthickness=0,
+            padding=(10, 4),
+        )
+        self.style.map(
+            "Run.TButton",
+            background=[("active", hover_color)],
+            foreground=[("active", text_color)],
+        )
+        self.style.configure(
+            "App.TCheckbutton",
+            background=bg_color,
+            foreground=text_color,
+        )
+        self.style.map(
+            "App.TCheckbutton",
+            background=[("active", bg_color)],
+            foreground=[("active", text_color)],
+        )
+        self.style.configure(
+            "App.Vertical.TScrollbar",
+            background=bg_color,
+            troughcolor=bg_color,
+            bordercolor=bg_color,
+            lightcolor=bg_color,
+            darkcolor=bg_color,
+        )
+
         self.background_canvas = tk.Canvas(self.root, bg=bg_color, highlightthickness=0)
         self.background_canvas.pack(fill="both", expand=True)
         self.background_canvas.bind("<Configure>", self._on_root_resize)
 
-        content = tk.Frame(self.background_canvas, bg=bg_color)
+        content = ttk.Frame(self.background_canvas, style="App.TFrame")
         self.content_window = self.background_canvas.create_window((0, 0), window=content, anchor="nw")
 
-        header = tk.Frame(content, bg=bg_color)
+        header = ttk.Frame(content, style="App.TFrame")
         header.pack(fill="x", padx=12, pady=8)
 
-        self.select_button = tk.Button(
+        self.select_button = ttk.Button(
             header,
             text="Select Vault",
             command=self.select_vault,
-            font=("Helvetica", 12, "bold"),
-            bg=bg_color,
-            fg=text_color,
-            activebackground=hover_color,
-            activeforeground=text_color,
-            borderwidth=0,
-            highlightthickness=0,
-            padx=14,
-            pady=6,
+            style="App.TButton",
         )
         self.select_button.pack(side="left")
 
-        vault_label = tk.Label(
+        vault_label = ttk.Label(
             header,
             textvariable=self.vault_path,
             anchor="w",
-            bg=bg_color,
-            fg=text_color,
+            style="App.TLabel",
         )
         vault_label.pack(side="left", padx=10)
 
-        list_container = tk.Frame(content, bg=bg_color)
+        list_container = ttk.Frame(content, style="App.TFrame")
         list_container.pack(fill="both", expand=True, padx=12)
 
         self.canvas = tk.Canvas(list_container, borderwidth=0, highlightthickness=0, bg=bg_color)
-        self.scrollbar = tk.Scrollbar(
+        self.scrollbar = ttk.Scrollbar(
             list_container,
             orient="vertical",
             command=self.canvas.yview,
-            troughcolor=bg_color,
-            bg=bg_color,
-            activebackground=hover_color,
+            style="App.Vertical.TScrollbar",
         )
         self.canvas.configure(yscrollcommand=self.scrollbar.set, bg=bg_color)
 
         self.scrollbar.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
 
-        self.checkbox_frame = tk.Frame(self.canvas, bg=bg_color)
+        self.checkbox_frame = ttk.Frame(self.canvas, style="App.TFrame")
         self.canvas.create_window((0, 0), window=self.checkbox_frame, anchor="nw")
         self.checkbox_frame.bind(
             "<Configure>",
             lambda event: self.canvas.configure(scrollregion=self.canvas.bbox("all")),
         )
 
-        footer = tk.Frame(content, bg=bg_color)
+        footer = ttk.Frame(content, style="App.TFrame")
         footer.pack(fill="x", padx=12, pady=8)
 
-        run_button = tk.Button(
+        run_button = ttk.Button(
             footer,
             text="Run Combine",
             command=self.run_combine,
-            bg=bg_color,
-            fg=text_color,
-            activebackground=hover_color,
-            activeforeground=text_color,
-            borderwidth=0,
-            highlightthickness=0,
-            padx=10,
-            pady=4,
+            style="Run.TButton",
         )
         run_button.pack(side="left")
 
-        status_label = tk.Label(
+        status_label = ttk.Label(
             footer,
             textvariable=self.status_text,
             anchor="w",
-            bg=bg_color,
-            fg=text_color,
+            style="App.TLabel",
         )
         status_label.pack(side="left", padx=10)
 
@@ -188,26 +218,21 @@ class CombineMDApp:
             if folder == OUTDIR_NAME:
                 continue
             var = tk.BooleanVar(value=True)
-            checkbox = tk.Checkbutton(
+            checkbox = ttk.Checkbutton(
                 self.checkbox_frame,
                 text=folder,
                 variable=var,
-                bg="#000000",
-                fg="#ffffff",
-                activebackground="#000000",
-                activeforeground="#ffffff",
-                selectcolor="#000000",
+                style="App.TCheckbutton",
             )
             checkbox.grid(row=row, column=0, sticky="w", pady=2)
             self.folder_vars[folder] = var
             row += 1
 
         if not self.folder_vars:
-            label = tk.Label(
+            label = ttk.Label(
                 self.checkbox_frame,
                 text="No subfolders found in vault.",
-                bg="#000000",
-                fg="#ffffff",
+                style="App.TLabel",
             )
             label.grid(row=0, column=0, sticky="w")
 
