@@ -127,7 +127,11 @@ class CombineMDApp:
             subprocess.run(combine_cmd, check=True)
 
             tmpdir = os.path.join(outdir, TMPDIR_NAME)
-            md_files = [f for f in os.listdir(tmpdir) if f.lower().endswith(".md")]
+            md_files = [
+                os.path.join(tmpdir, f)
+                for f in os.listdir(tmpdir)
+                if f.lower().endswith(".md")
+            ]
             if not md_files:
                 messagebox.showerror("Error", "No markdown files were generated.")
                 self.status_text.set("No markdown files generated.")
