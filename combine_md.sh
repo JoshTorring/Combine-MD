@@ -13,7 +13,7 @@ TMPDIR_NAME="_tmp_md_flat"
 OUTRTF_NAME="combined.rtf"
 
 # Folder names to ignore (by name)
-IGNORE_DIRS=(".obsidian" "Config" "Old_Notes" "Todo" "US_Trip" "Unsorted" "Admin" "$OUTDIR_NAME")
+IGNORE_DIRS=(".obsidian" "$OUTDIR_NAME" "Config" "Old_Notes" "Todo" "US_Trip" "Unsorted" "Admin")
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
