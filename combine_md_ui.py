@@ -33,6 +33,8 @@ class CombineMDApp:
         plus_color = "#ff3333"
 
         self.style.theme_use("clam")
+        self.style.configure("TFrame", background=bg_color)
+        self.style.configure("TLabel", background=bg_color, foreground=text_color)
         self.style.configure("App.TFrame", background=bg_color)
         self.style.configure("App.TLabel", background=bg_color, foreground=text_color)
         self.style.configure(
@@ -82,7 +84,7 @@ class CombineMDApp:
 
         self.background_canvas = tk.Canvas(self.root, bg=bg_color, highlightthickness=0)
         self.background_canvas.pack(fill="both", expand=True)
-        self.background_canvas.bind("<Configure>", self._on_root_resize)
+        self.root.bind("<Configure>", self._on_root_resize)
 
         content = ttk.Frame(self.background_canvas, style="App.TFrame")
         self.content_window = self.background_canvas.create_window((0, 0), window=content, anchor="nw")
@@ -147,14 +149,24 @@ class CombineMDApp:
         )
         status_label.pack(side="left", padx=10)
 
-        self._draw_background_pattern(640, 480, plus_color)
+        self._refresh_background(plus_color)
 
     def _on_root_resize(self, event: tk.Event) -> None:
         if not self.background_canvas or self.content_window is None:
             return
+        self._refresh_background("#ff3333")
+
+    def _refresh_background(self, plus_color: str) -> None:
+        if not self.background_canvas or self.content_window is None:
+            return
+        self.root.update_idletasks()
+        width = self.background_canvas.winfo_width()
+        height = self.background_canvas.winfo_height()
+        if width <= 1 or height <= 1:
+            return
         self.background_canvas.coords(self.content_window, 0, 0)
-        self.background_canvas.itemconfigure(self.content_window, width=event.width, height=event.height)
-        self._draw_background_pattern(event.width, event.height, "#ff3333")
+        self.background_canvas.itemconfigure(self.content_window, width=width, height=height)
+        self._draw_background_pattern(width, height, plus_color)
 
     def _draw_background_pattern(self, width: int, height: int, plus_color: str) -> None:
         if not self.background_canvas:
