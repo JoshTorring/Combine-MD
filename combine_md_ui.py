@@ -15,53 +15,153 @@ class CombineMDApp:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Combine MD")
+        self.root.configure(bg="#000000")
         self.vault_path = tk.StringVar(value="")
         self.status_text = tk.StringVar(value="Select a vault to begin.")
         self.folder_vars = {}
+        self.select_button: tk.Button | None = None
+        self.background_canvas: tk.Canvas | None = None
+        self.content_window: int | None = None
 
         self._build_ui()
 
     def _build_ui(self) -> None:
-        header = tk.Frame(self.root)
+        bg_color = "#000000"
+        text_color = "#ffffff"
+        hover_color = "#7ecbff"
+        plus_color = "#ff3333"
+
+        self.background_canvas = tk.Canvas(self.root, bg=bg_color, highlightthickness=0)
+        self.background_canvas.pack(fill="both", expand=True)
+        self.background_canvas.bind("<Configure>", self._on_root_resize)
+
+        content = tk.Frame(self.background_canvas, bg=bg_color)
+        self.content_window = self.background_canvas.create_window((0, 0), window=content, anchor="nw")
+
+        header = tk.Frame(content, bg=bg_color)
         header.pack(fill="x", padx=12, pady=8)
 
-        select_button = tk.Button(header, text="Select Vault", command=self.select_vault)
-        select_button.pack(side="left")
+        self.select_button = tk.Button(
+            header,
+            text="Select Vault",
+            command=self.select_vault,
+            font=("Helvetica", 12, "bold"),
+            bg=bg_color,
+            fg=text_color,
+            activebackground=hover_color,
+            activeforeground=text_color,
+            borderwidth=0,
+            highlightthickness=0,
+            padx=14,
+            pady=6,
+        )
+        self.select_button.pack(side="left")
 
-        vault_label = tk.Label(header, textvariable=self.vault_path, anchor="w")
+        vault_label = tk.Label(
+            header,
+            textvariable=self.vault_path,
+            anchor="w",
+            bg=bg_color,
+            fg=text_color,
+        )
         vault_label.pack(side="left", padx=10)
 
-        list_container = tk.Frame(self.root)
+        list_container = tk.Frame(content, bg=bg_color)
         list_container.pack(fill="both", expand=True, padx=12)
 
-        self.canvas = tk.Canvas(list_container, borderwidth=0)
-        self.scrollbar = tk.Scrollbar(list_container, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas = tk.Canvas(list_container, borderwidth=0, highlightthickness=0, bg=bg_color)
+        self.scrollbar = tk.Scrollbar(
+            list_container,
+            orient="vertical",
+            command=self.canvas.yview,
+            troughcolor=bg_color,
+            bg=bg_color,
+            activebackground=hover_color,
+        )
+        self.canvas.configure(yscrollcommand=self.scrollbar.set, bg=bg_color)
 
         self.scrollbar.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
 
-        self.checkbox_frame = tk.Frame(self.canvas)
+        self.checkbox_frame = tk.Frame(self.canvas, bg=bg_color)
         self.canvas.create_window((0, 0), window=self.checkbox_frame, anchor="nw")
         self.checkbox_frame.bind(
             "<Configure>",
             lambda event: self.canvas.configure(scrollregion=self.canvas.bbox("all")),
         )
 
-        footer = tk.Frame(self.root)
+        footer = tk.Frame(content, bg=bg_color)
         footer.pack(fill="x", padx=12, pady=8)
 
-        run_button = tk.Button(footer, text="Run Combine", command=self.run_combine)
+        run_button = tk.Button(
+            footer,
+            text="Run Combine",
+            command=self.run_combine,
+            bg=bg_color,
+            fg=text_color,
+            activebackground=hover_color,
+            activeforeground=text_color,
+            borderwidth=0,
+            highlightthickness=0,
+            padx=10,
+            pady=4,
+        )
         run_button.pack(side="left")
 
-        status_label = tk.Label(footer, textvariable=self.status_text, anchor="w")
+        status_label = tk.Label(
+            footer,
+            textvariable=self.status_text,
+            anchor="w",
+            bg=bg_color,
+            fg=text_color,
+        )
         status_label.pack(side="left", padx=10)
+
+        self._draw_background_pattern(640, 480, plus_color)
+
+    def _on_root_resize(self, event: tk.Event) -> None:
+        if not self.background_canvas or self.content_window is None:
+            return
+        self.background_canvas.coords(self.content_window, 0, 0)
+        self.background_canvas.itemconfigure(self.content_window, width=event.width, height=event.height)
+        self._draw_background_pattern(event.width, event.height, "#ff3333")
+
+    def _draw_background_pattern(self, width: int, height: int, plus_color: str) -> None:
+        if not self.background_canvas:
+            return
+        self.background_canvas.delete("pattern")
+        spacing = 24
+        size = 3
+        for x in range(0, width, spacing):
+            for y in range(0, height, spacing):
+                self.background_canvas.create_line(
+                    x - size,
+                    y,
+                    x + size,
+                    y,
+                    fill=plus_color,
+                    width=1,
+                    tags="pattern",
+                )
+                self.background_canvas.create_line(
+                    x,
+                    y - size,
+                    x,
+                    y + size,
+                    fill=plus_color,
+                    width=1,
+                    tags="pattern",
+                )
+        self.background_canvas.tag_lower("pattern")
 
     def select_vault(self) -> None:
         path = filedialog.askdirectory(title="Select Obsidian Vault")
         if not path:
             return
         self.vault_path.set(path)
+        vault_name = os.path.basename(path.rstrip(os.sep)) or path
+        if self.select_button:
+            self.select_button.config(text=vault_name)
         self.status_text.set("Vault loaded. Choose folders to include.")
         self._populate_folders(path)
 
@@ -88,13 +188,27 @@ class CombineMDApp:
             if folder == OUTDIR_NAME:
                 continue
             var = tk.BooleanVar(value=True)
-            checkbox = tk.Checkbutton(self.checkbox_frame, text=folder, variable=var)
+            checkbox = tk.Checkbutton(
+                self.checkbox_frame,
+                text=folder,
+                variable=var,
+                bg="#000000",
+                fg="#ffffff",
+                activebackground="#000000",
+                activeforeground="#ffffff",
+                selectcolor="#000000",
+            )
             checkbox.grid(row=row, column=0, sticky="w", pady=2)
             self.folder_vars[folder] = var
             row += 1
 
         if not self.folder_vars:
-            label = tk.Label(self.checkbox_frame, text="No subfolders found in vault.")
+            label = tk.Label(
+                self.checkbox_frame,
+                text="No subfolders found in vault.",
+                bg="#000000",
+                fg="#ffffff",
+            )
             label.grid(row=0, column=0, sticky="w")
 
     def run_combine(self) -> None:
