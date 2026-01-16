@@ -28,6 +28,18 @@ Run the Tkinter UI to select a vault folder, choose which top-level folders to i
 
 `python3 combine_md_ui.py`
 
+## Electron UI (work in progress)
+
+There is an initial Electron app scaffold under `electron_app/` that uses the same Python backend and still requires Pandoc.
+
+To run the Electron UI locally:
+
+```
+cd electron_app
+npm install
+npm run start
+```
+
 
 ### Ignoring Folders
 
