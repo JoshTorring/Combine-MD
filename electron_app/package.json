@@ -1,0 +1,13 @@
+{
+  "name": "combine-md-electron",
+  "version": "0.1.0",
+  "description": "Electron UI for Combine MD",
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^30.0.0"
+  }
+}

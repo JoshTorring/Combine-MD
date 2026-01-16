@@ -1,0 +1,94 @@
+:root {
+  color-scheme: light dark;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  background: #0f1218;
+  color: #e3e6ef;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.app__header h1 {
+  margin-bottom: 8px;
+  font-size: 2rem;
+}
+
+.layout {
+  margin-top: 24px;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.card {
+  background: #1b202b;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.folder-list {
+  margin-top: 12px;
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.muted {
+  color: #a8b0c5;
+}
+
+button {
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #2c3342;
+  color: #f0f3fa;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #5f6bff;
+}
+
+select {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #364154;
+  background: #121722;
+  color: #e3e6ef;
+}
+
+.status {
+  margin-top: 12px;
+}

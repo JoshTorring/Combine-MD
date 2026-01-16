@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Combine MD</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app__header">
+        <h1>Combine MD</h1>
+        <p>Combine Obsidian vault notes into a single document.</p>
+      </header>
+
+      <section class="card">
+        <div class="row">
+          <button id="selectVault">Select Vault</button>
+          <span id="vaultPath" class="muted">No vault selected.</span>
+        </div>
+      </section>
+
+      <section class="layout">
+        <div class="card">
+          <h2>Subfolders</h2>
+          <div id="folderList" class="folder-list muted">
+            Select a vault to load folders.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Output</h2>
+          <label class="field">
+            Output format
+            <select id="outputFormat">
+              <option value="rtf">.rtf</option>
+              <option value="docx">.docx</option>
+              <option value="md">.md</option>
+            </select>
+          </label>
+
+          <button id="runCombine" class="primary">Run Combine</button>
+          <p id="status" class="status muted">Select a vault to begin.</p>
+        </div>
+      </section>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>
